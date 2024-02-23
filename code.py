@@ -27,6 +27,19 @@ uart = busio.UART(board.D3, board.D2, baudrate=9600, timeout=10)
 # Create a GPS module instance.
 gps = adafruit_gps.GPS(uart, debug=False)  # Use UART/pyserial
 # gps = adafruit_gps.GPS_GtopI2C(i2c, debug=False)  # Use I2C interface
+def dilutionGrader():
+    if gps.horizontal_dilution < 1:
+        print("Ideal")
+    elif gps.horizontal_dilution < 2:
+        print("Excellent")
+    elif gps.horizontal_dilution < 5:
+        print("Good")
+    elif gps.horizontal_dilution < 10:
+        print("Moderate")
+    elif gps.horizontal_dilution < 20:
+        print("Fair")
+    else:
+        print("Poor")
 
 
 # Initialize the GPS module by changing what data it sends and at what rate.
@@ -51,7 +64,7 @@ gps.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
 # gps.send_command(b'PMTK220,2000')
 # You can also speed up the rate, but don't go too fast or else you can lose
 # data during parsing.  This would be twice a second (2hz, 500ms delay):
-gps.send_command(b'PMTK220,500')
+gps.send_command(b"PMTK220,500")
 
 # Main loop runs forever printing the location, etc. every second.
 last_print = time.monotonic()
@@ -77,35 +90,42 @@ while True:
                 gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
                 gps.timestamp_utc.tm_mday,  # struct_time object that holds
                 gps.timestamp_utc.tm_year,  # the fix time.  Note you might
-                gps.timestamp_utc.tm_hour,  # not get all data like year, day,
+                gps.timestamp_utc.tm_hour - 6,  # not get all data like year, day,
                 gps.timestamp_utc.tm_min,  # month!
                 gps.timestamp_utc.tm_sec,
             )
         )
-        print("Latitude: {0:.6f} degrees".format(gps.latitude))
-        print("Longitude: {0:.6f} degrees".format(gps.longitude))
-        print(
-            "Precise Latitude: {:2.}{:2.4f} degrees".format(
-                gps.latitude_degrees, gps.latitude_minutes
-            )
-        )
-        print(
-            "Precise Longitude: {:2.}{:2.4f} degrees".format(
-                gps.longitude_degrees, gps.longitude_minutes
-            )
-        )
+        print("Raw Latitude: {0:.6f} degrees".format(gps.latitude))
+        print("Raw Longitude: {0:.6f} degrees".format(gps.longitude))
+        # print(f"DDM Latitude: {int(gps.latitude)} Degrees {60 *
+        # (int(gps.latitude)-gps.latitude)} Minutes")
+        # print(f"DDM Longitude: {int(gps.longitude)} Degrees {60 *
+        # (int(gps.longitude)-gps.longitude)} Minutes")
+
+        # print(
+        #    "Precise Latitude: {:2.}{:2.4f} degrees".format(
+        #        gps.latitude_degrees, gps.latitude_minutes
+        #    )
+        # )
+        # print(
+        #    "Precise Longitude: {:2.}{:2.4f} degrees".format(
+        #        gps.longitude_degrees, gps.longitude_minutes
+        #    )
+        # )
         print("Fix quality: {}".format(gps.fix_quality))
         # Some attributes beyond latitude, longitude and timestamp are optional
         # and might not be present.  Check if they're None before trying to use!
         if gps.satellites is not None:
             print("# satellites: {}".format(gps.satellites))
         if gps.altitude_m is not None:
-            print("Altitude: {} meters".format(gps.altitude_m))
+            print("Altitude: {} feet".format(gps.altitude_m * 3.28084))
         if gps.speed_knots is not None:
-            print("Speed: {} miles/hour".format(gps.speed_knots*1.15078))
+            print("Speed: {} miles/hour".format(gps.speed_knots * 1.15078))
         if gps.track_angle_deg is not None:
             print("Track angle: {} degrees".format(gps.track_angle_deg))
         if gps.horizontal_dilution is not None:
-            print("Horizontal dilution: {}".format(gps.horizontal_dilution))
-        if gps.height_geoid is not None:
-            print("Height geoid: {} meters".format(gps.height_geoid))
+            print(f"Horizontal dilution: {gps.horizontal_dilution}")
+            print(f"Dilution Grade {dilutionGrader}")
+            # print(f"Horizontal dilution: {}".format(gps.horizontal_dilution))
+        # if gps.height_geoid is not None:
+        #    print("Height geoid: {} meters".format(gps.height_geoid))
