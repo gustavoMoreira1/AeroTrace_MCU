@@ -95,8 +95,8 @@ while True:
                 gps.timestamp_utc.tm_sec,
             )
         )
-        print("Raw Latitude: {0:.6f} degrees".format(gps.latitude))
-        print("Raw Longitude: {0:.6f} degrees".format(gps.longitude))
+        print("Raw Latitude: {0:.9f} degrees".format(gps.latitude))
+        print("Raw Longitude: {0:.9f} degrees".format(gps.longitude))
         # print(f"DDM Latitude: {int(gps.latitude)} Degrees {60 *
         # (int(gps.latitude)-gps.latitude)} Minutes")
         # print(f"DDM Longitude: {int(gps.longitude)} Degrees {60 *
