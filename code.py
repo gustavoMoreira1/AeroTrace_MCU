@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
 # Simple GPS module demonstration.
@@ -29,17 +29,17 @@ gps = adafruit_gps.GPS(uart, debug=False)  # Use UART/pyserial
 # gps = adafruit_gps.GPS_GtopI2C(i2c, debug=False)  # Use I2C interface
 def dilutionGrader():
     if gps.horizontal_dilution < 1:
-        print("Ideal")
+        print("Dilution Grade: Ideal")
     elif gps.horizontal_dilution < 2:
-        print("Excellent")
+        print("Dilution Grade: Excellent")
     elif gps.horizontal_dilution < 5:
-        print("Good")
+        print("Dilution Grade: Good")
     elif gps.horizontal_dilution < 10:
-        print("Moderate")
+        print("Dilution Grade: Moderate")
     elif gps.horizontal_dilution < 20:
-        print("Fair")
+        print("Dilution Grade: Fair")
     else:
-        print("Poor")
+        print("Dilution Grade: Poor")
 
 
 # Initialize the GPS module by changing what data it sends and at what rate.
@@ -64,7 +64,10 @@ gps.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
 # gps.send_command(b'PMTK220,2000')
 # You can also speed up the rate, but don't go too fast or else you can lose
 # data during parsing.  This would be twice a second (2hz, 500ms delay):
-gps.send_command(b"PMTK220,500")
+# gps.send_command(b"PMTK220,500")
+# data during parsing.  This would be twice a second (8hz, 125ms delay):
+gps.send_command(b"PMTK220,125")
+
 
 # Main loop runs forever printing the location, etc. every second.
 last_print = time.monotonic()
@@ -86,13 +89,14 @@ while True:
         # Print out details about the fix like location, date, etc.
         print("=" * 40)  # Print a separator line.
         print(
-            "Fix timestamp: {}/{}/{} {:02}:{:02}:{:02}".format(
+            "Fix timestamp: {}/{}/{} {:02}:{:02}:{:02}.{:03}".format(
                 gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
                 gps.timestamp_utc.tm_mday,  # struct_time object that holds
                 gps.timestamp_utc.tm_year,  # the fix time.  Note you might
                 gps.timestamp_utc.tm_hour - 6,  # not get all data like year, day,
                 gps.timestamp_utc.tm_min,  # month!
                 gps.timestamp_utc.tm_sec,
+                gps.timestamp_utc[6]
             )
         )
         print("Raw Latitude: {0:.9f} degrees".format(gps.latitude))
@@ -125,7 +129,8 @@ while True:
             print("Track angle: {} degrees".format(gps.track_angle_deg))
         if gps.horizontal_dilution is not None:
             print(f"Horizontal dilution: {gps.horizontal_dilution}")
-            print(f"Dilution Grade {dilutionGrader}")
+            dilutionGrader()
+            # print(f"Dilution Grade {dilutionGrader()}")
             # print(f"Horizontal dilution: {}".format(gps.horizontal_dilution))
         # if gps.height_geoid is not None:
         #    print("Height geoid: {} meters".format(gps.height_geoid))
