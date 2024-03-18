@@ -66,8 +66,10 @@ gps.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
 # data during parsing.  This would be twice a second (2hz, 500ms delay):
 # gps.send_command(b"PMTK220,500")
 # data during parsing.  This would be twice a second (8hz, 125ms delay):
-gps.send_command(b"PMTK220,125")
-
+# gps.send_command(b"PMTK220,125")
+# data during parsing.  This would be twice a second (10hz, 100ms delay):
+# 10 Hz is the maximum frequency... need to stress test for later -
+gps.send_command(b"PMTK220,100")
 
 # Main loop runs forever printing the location, etc. every second.
 last_print = time.monotonic()
@@ -89,14 +91,15 @@ while True:
         # Print out details about the fix like location, date, etc.
         print("=" * 40)  # Print a separator line.
         print(
-            "Fix timestamp: {}/{}/{} {:02}:{:02}:{:02}.{:03}".format(
+            "Fix timestamp: {}/{}/{} {:02}:{:02}:{:02}".format(
                 gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
                 gps.timestamp_utc.tm_mday,  # struct_time object that holds
                 gps.timestamp_utc.tm_year,  # the fix time.  Note you might
                 gps.timestamp_utc.tm_hour - 6,  # not get all data like year, day,
                 gps.timestamp_utc.tm_min,  # month!
                 gps.timestamp_utc.tm_sec,
-                gps.timestamp_utc[6]
+                # gps.timestamp_utc[6]
+                # cannot find way to scape ms. Need to identify timestamp init code.
             )
         )
         print("Raw Latitude: {0:.9f} degrees".format(gps.latitude))
