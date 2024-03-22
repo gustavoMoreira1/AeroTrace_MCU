@@ -1,0 +1,118 @@
+# SPDX-FileCopyrightText: 2020 ladyada for Adafruit Industries
+# SPDXrt BLERadio
+from adafruit_ble import BLERadio
+from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
+from adafruit_ble.services.nordic import UARTService
+
+import time
+import board
+import busio
+
+import adafruit_gps
+
+# Create a serial connection for the GPS connection using default speed and
+# a slightly higher timeout (GPS modules typically update once a second).
+# These are the defaults you should use for the GPS FeatherWing.
+# For other boards set RX = GPS module TX, and TX = GPS module RX pins.
+uart = busio.UART(board.D3, board.D2, baudrate=9600, timeout=10)
+
+# for a computer, use the pyserial library for uart access
+# import serial
+# uart = serial.Serial("/dev/ttyUSB0", baudrate=9600, timeout=10)
+
+# If using I2C, we'll create an I2C interface to talk to using default pins
+# i2c = board.I2C()  # uses board.SCL and board.SDA
+# i2c = board.STEMMA_I2C()  # For using the built-in
+
+# Create a GPS module instance.
+gps = adafruit_gps.GPS(uart, debug=False)  # Use UART/pyserial
+# gps = adafruit_gps.GPS_GtopI2C(i2c, debug=False)  # Use I2C interface
+def dilutionGrader():
+    if gps.horizontal_dilution < 1:
+        print("Dilution Grade: Ideal")
+    elif gps.horizontal_dilution < 2:
+        print("Dilution Grade: Excellent")
+    elif gps.horizontal_dilution < 5:
+        print("Dilution Grade: Good")
+    elif gps.horizontal_dilution < 10:
+        print("Dilution Grade: Moderate")
+    elif gps.horizontal_dilution < 20:
+        print("Dilution Grade: Fair")
+    else:
+        print("Dilution Grade: Poor")
+
+
+# Initialize the GPS module by changing what data it sends and at what rate.
+# These are NMEA extensions for PMTK_314_SET_NMEA_OUTPUT and
+# PMTK_220_SET_NMEA_UPDATERATE but you can send anything from here to adjust
+# the GPS module behavior:
+#   https://cdn-shop.adafruit.com/datasheets/PMTK_A11.pdf
+
+# Turn on the basic GGA and RMC info (what you typically want)
+gps.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
+# Turn on just minimum info (RMC only, location):
+# gps.send_command(b'PMTK314,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0')
+# Turn off everything:
+# gps.send_command(b'PMTK314,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0')
+# Turn on everything (not all of it is parsed!)
+# gps.send_command(b'PMTK314,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0')
+
+# Set update rate to once a second (1hz) which is what you typically want.
+# gps.send_command(b"PMTK220,1000")
+# Or decrease to once every two seconds by doubling the millisecond value.
+# Be sure to also increase your UART timeout above!
+# gps.send_command(b'PMTK220,2000')
+# You can also speed up the rate, but don't go too fast or else you can lose
+# data during parsing.  This would be twice a second (2hz, 500ms delay):
+# gps.send_command(b"PMTK220,500")
+# data during parsing.  This would be twice a second (8hz, 125ms delay):
+# gps.send_command(b"PMTK220,125")
+# data during parsing.  This would be twice a second (10hz, 100ms delay):
+# 10 Hz is the maximum frequency... need to stress test for later -
+# gps.send_command(b"PMTK220,100")
+# data during parsing.  This would be twice a second (4hz, 250ms delay):
+gps.send_command(b"PMTK220,250")
+
+# Main loop runs forever printing the location, etc. every second.
+last_print = time.monotonic()
+count = 0
+
+ble = BLERadio()
+ble.name = "Aerotrace1"
+uart = UARTService()
+advertisement = ProvideServicesAdvertisement(uart)
+
+connectonce = 0
+
+while True:
+
+    gps.update()
+    last_time = 0
+    # Every second print out current location details if there's a fix.
+    current = time.monotonic()
+    print(current)
+    print(last_print)
+    if current - last_print >= 0.001:
+        print("I am here")
+        last_print = current
+        if not gps.has_fix:
+            # Try again if we don't have a fix yet.
+            current_time = time.time()
+            count = count + 1
+            if count == 4:
+                count = 0
+            print(f"Waiting for fix... {current_time} {count}")
+            continue
+
+    # We have a fix! (gps.has_fix is true)
+    # Print out details about the fix like location, date, etc.
+
+    ble.start_advertising(advertisement)
+    print("Advertising...")
+    while not ble.connected:
+        pass
+    while ble.connected:
+        if connectonce == 0:
+            print("connected")
+            connectonce = 1
+        uart.write("Hello")
