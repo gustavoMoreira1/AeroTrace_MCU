@@ -69,23 +69,32 @@ gps.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
 # gps.send_command(b"PMTK220,125")
 # data during parsing.  This would be twice a second (10hz, 100ms delay):
 # 10 Hz is the maximum frequency... need to stress test for later -
-gps.send_command(b"PMTK220,100")
+# gps.send_command(b"PMTK220,100")
+# data during parsing.  This would be twice a second (4hz, 250ms delay):
+gps.send_command(b"PMTK220,250")
+
 
 # Main loop runs forever printing the location, etc. every second.
 last_print = time.monotonic()
+count = 0
 while True:
     # Make sure to call gps.update() every loop iteration and at least twice
     # as fast as data comes from the GPS unit (usually every second).
     # This returns a bool that's true if it parsed new data (you can ignore it
     # though if you don't care and instead look at the has_fix property).
     gps.update()
+    last_time = 0
     # Every second print out current location details if there's a fix.
     current = time.monotonic()
-    if current - last_print >= 1.0:
+    if current - last_print >= 0.250:
         last_print = current
         if not gps.has_fix:
             # Try again if we don't have a fix yet.
-            print("Waiting for fix...")
+            current_time = time.time()
+            count = count + 1
+            if count == 4:
+                count = 0
+            print(f"Waiting for fix... {current_time} {count}")
             continue
         # We have a fix! (gps.has_fix is true)
         # Print out details about the fix like location, date, etc.
@@ -133,6 +142,7 @@ while True:
         if gps.horizontal_dilution is not None:
             print(f"Horizontal dilution: {gps.horizontal_dilution}")
             dilutionGrader()
+
             # print(f"Dilution Grade {dilutionGrader()}")
             # print(f"Horizontal dilution: {}".format(gps.horizontal_dilution))
         # if gps.height_geoid is not None:
