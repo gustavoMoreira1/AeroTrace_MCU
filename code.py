@@ -10,7 +10,7 @@ import busio
 
 import adafruit_gps
 
-# Create a serial connection for the GPS connection using default speed and
+# Create a serial connection for the GPS connection using default speed and\
 # a slightly higher timeout (GPS modules typically update once a second).
 # These are the defaults you should use for the GPS FeatherWing.
 # For other boards set RX = GPS module TX, and TX = GPS module RX pins.
