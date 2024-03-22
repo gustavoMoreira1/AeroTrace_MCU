@@ -10,6 +10,16 @@ import busio
 
 import adafruit_gps
 
+from adafruit_ble import BLERadio
+from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
+from adafruit_ble.services.nordic import UARTService
+
+ble = BLERadio()
+ble.name = "Aerotrace1"
+uart1 = UARTService()
+advertisement = ProvideServicesAdvertisement(uart1)
+
+connectonce = 0
 # Create a serial connection for the GPS connection using default speed and\
 # a slightly higher timeout (GPS modules typically update once a second).
 # These are the defaults you should use for the GPS FeatherWing.
@@ -29,17 +39,17 @@ gps = adafruit_gps.GPS(uart, debug=False)  # Use UART/pyserial
 # gps = adafruit_gps.GPS_GtopI2C(i2c, debug=False)  # Use I2C interface
 def dilutionGrader():
     if gps.horizontal_dilution < 1:
-        print("Dilution Grade: Ideal")
+        uart1.write("Dilution Grade: Ideal")
     elif gps.horizontal_dilution < 2:
-        print("Dilution Grade: Excellent")
+        uart1.write("Dilution Grade: Excellent")
     elif gps.horizontal_dilution < 5:
-        print("Dilution Grade: Good")
+        uart1.write("Dilution Grade: Good")
     elif gps.horizontal_dilution < 10:
-        print("Dilution Grade: Moderate")
+        uart1.write("Dilution Grade: Moderate")
     elif gps.horizontal_dilution < 20:
-        print("Dilution Grade: Fair")
+        uart1.write("Dilution Grade: Fair")
     else:
-        print("Dilution Grade: Poor")
+        uart1.write("Dilution Grade: Poor")
 
 
 # Initialize the GPS module by changing what data it sends and at what rate.
@@ -98,21 +108,32 @@ while True:
             continue
         # We have a fix! (gps.has_fix is true)
         # Print out details about the fix like location, date, etc.
-        print("=" * 40)  # Print a separator line.
-        print(
-            "Fix timestamp: {}/{}/{} {:02}:{:02}:{:02}".format(
-                gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
-                gps.timestamp_utc.tm_mday,  # struct_time object that holds
-                gps.timestamp_utc.tm_year,  # the fix time.  Note you might
-                gps.timestamp_utc.tm_hour - 6,  # not get all data like year, day,
-                gps.timestamp_utc.tm_min,  # month!
-                gps.timestamp_utc.tm_sec,
-                # gps.timestamp_utc[6]
-                # cannot find way to scape ms. Need to identify timestamp init code.
-            )
-        )
-        print("Raw Latitude: {0:.9f} degrees".format(gps.latitude))
-        print("Raw Longitude: {0:.9f} degrees".format(gps.longitude))
+
+        ble.start_advertising(advertisement)
+        print("Advertising...")
+        while not ble.connected:
+            pass
+        while ble.connected:
+            if connectonce == 0:
+                print("connected")
+                connectonce = 1
+            uart1.write("========================================")
+            # Print a separator line.
+
+            uart1.write(
+                "Fix timestamp: {}/{}/{} {:02}:{:02}:{:02}".format(
+                    gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
+                    gps.timestamp_utc.tm_mday,  # struct_time object that holds
+                    gps.timestamp_utc.tm_year,  # the fix time.  Note you might
+                    gps.timestamp_utc.tm_hour - 6,  # not get all data like year, day,
+                    gps.timestamp_utc.tm_min,  # month!
+                    gps.timestamp_utc.tm_sec,
+                    # gps.timestamp_utc[6]
+                    # cannot find way to scape ms. Need to identify timestamp init code.
+                    )
+                )
+            uart1.write("Raw Latitude: {0:.9f} degrees".format(gps.latitude))
+            uart1.write("Raw Longitude: {0:.9f} degrees".format(gps.longitude))
         # print(f"DDM Latitude: {int(gps.latitude)} Degrees {60 *
         # (int(gps.latitude)-gps.latitude)} Minutes")
         # print(f"DDM Longitude: {int(gps.longitude)} Degrees {60 *
@@ -128,20 +149,20 @@ while True:
         #        gps.longitude_degrees, gps.longitude_minutes
         #    )
         # )
-        print("Fix quality: {}".format(gps.fix_quality))
+            uart1.write("Fix quality: {}".format(gps.fix_quality))
         # Some attributes beyond latitude, longitude and timestamp are optional
         # and might not be present.  Check if they're None before trying to use!
-        if gps.satellites is not None:
-            print("# satellites: {}".format(gps.satellites))
-        if gps.altitude_m is not None:
-            print("Altitude: {} feet".format(gps.altitude_m * 3.28084))
-        if gps.speed_knots is not None:
-            print("Speed: {} miles/hour".format(gps.speed_knots * 1.15078))
-        if gps.track_angle_deg is not None:
-            print("Track angle: {} degrees".format(gps.track_angle_deg))
-        if gps.horizontal_dilution is not None:
-            print(f"Horizontal dilution: {gps.horizontal_dilution}")
-            dilutionGrader()
+            if gps.satellites is not None:
+                uart1.write("# satellites: {}".format(gps.satellites))
+            if gps.altitude_m is not None:
+                uart1.write("Altitude: {} feet".format(gps.altitude_m * 3.28084))
+            if gps.speed_knots is not None:
+                uart1.write("Speed: {} miles/hour".format(gps.speed_knots * 1.15078))
+            if gps.track_angle_deg is not None:
+                uart1.write("Track angle: {} degrees".format(gps.track_angle_deg))
+            if gps.horizontal_dilution is not None:
+                uart1.write(f"Horizontal dilution: {gps.horizontal_dilution}")
+                dilutionGrader()
 
             # print(f"Dilution Grade {dilutionGrader()}")
             # print(f"Horizontal dilution: {}".format(gps.horizontal_dilution))
