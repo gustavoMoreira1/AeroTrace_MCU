@@ -15,7 +15,7 @@ from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 from adafruit_ble.services.nordic import UARTService
 
 ble = BLERadio()
-ble.name = "Aerotrace2"
+ble.name = "Aerotrace1"
 uart1 = UARTService()
 advertisement = ProvideServicesAdvertisement(uart1)
 
