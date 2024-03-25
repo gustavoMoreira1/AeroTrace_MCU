@@ -81,12 +81,25 @@ gps.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
 # 10 Hz is the maximum frequency... need to stress test for later -
 # gps.send_command(b"PMTK220,100")
 # data during parsing.  This would be twice a second (4hz, 250ms delay):
-gps.send_command(b"PMTK220,250")
 
+# here is the frequency, do not let it go over 10!!
+frequency_hertz = 8
+
+frequency_conversion = int(1/frequency_hertz * 1000)  # AKA miliseconds
+gps_send_command = "PMTK220,"+str(frequency_conversion)
+# print(gps_send_command)
+# gps.send_command(b"PMTK220,250")
+
+# experimental gps.senc_command
+gps.send_command(bytes(gps_send_command, 'ascii'))
 
 # Main loop runs forever printing the location, etc. every second.
 last_print = time.monotonic()
 count = 0
+
+#this flag is used to indicate when the BLE disconnects.
+disconnected_BLE = False
+
 while True:
     # Make sure to call gps.update() every loop iteration and at least twice
     # as fast as data comes from the GPS unit (usually every second).
@@ -96,15 +109,14 @@ while True:
     last_time = 0
     # Every second print out current location details if there's a fix.
     current = time.monotonic()
-    if current - last_print >= 0.250:
+    if current - last_print >= (frequency_conversion/1000):
         last_print = current
         if not gps.has_fix:
             # Try again if we don't have a fix yet.
-            current_time = time.time()
             count = count + 1
-            if count == 4:
+            if count == frequency_hertz:
                 count = 0
-            print(f"Waiting for fix... {current_time} {count}")
+            print(f"Waiting for fix... {time.time()} {count}")
             continue
         # We have a fix! (gps.has_fix is true)
         # Print out details about the fix like location, date, etc.
@@ -120,18 +132,36 @@ while True:
             uart1.write("========================================")
             # Print a separator line.
             
-            uart1.write(
-                "Fix timestamp: {}/{}/{} {:02}:{:02}:{:02}".format(
-                    gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
-                    gps.timestamp_utc.tm_mday,  # struct_time object that holds
-                    gps.timestamp_utc.tm_year,  # the fix time.  Note you might
-                    gps.timestamp_utc.tm_hour - 6,  # not get all data like year, day,
-                    gps.timestamp_utc.tm_min,  # month!
-                    gps.timestamp_utc.tm_sec,
-                    # gps.timestamp_utc[6]
-                    # cannot find way to scape ms. Need to identify timestamp init code.
+            try:
+                uart1.write(
+                    "Fix timestamp: {}/{}/{} {:02}:{:02}:{:02}".format(
+                        gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
+                        gps.timestamp_utc.tm_mday,  # struct_time object that holds
+                        gps.timestamp_utc.tm_year,  # the fix time.  Note you might
+                        gps.timestamp_utc.tm_hour - 6,  # Central Time zone
+                        gps.timestamp_utc.tm_min,  # month!
+                        gps.timestamp_utc.tm_sec,
+                        # gps.timestamp_utc[6]
+                        # cannot find way to scape ms. 
+                        # Need to identify timestamp init code.
                     )
                 )
+            except Exception:
+                with open('gps.txt', 'w') as f:
+                    f.write(
+                        "Fix timestamp: {}/{}/{} {:02}:{:02}:{:02}".format(
+                            gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
+                            gps.timestamp_utc.tm_mday,  # struct_time object that holds
+                            gps.timestamp_utc.tm_year,  # the fix time.  Note you might
+                            gps.timestamp_utc.tm_hour - 6,  # Central Time zone
+                            gps.timestamp_utc.tm_min,  # month!
+                            gps.timestamp_utc.tm_sec,
+                            # gps.timestamp_utc[6]
+                            # cannot find way to scape ms. 
+                            # Need to identify timestamp init code.
+                        )
+                    )
+                
         # print("Raw Latitude: {0:.9f} degrees".format(gps.latitude))
         # print("Raw Longitude: {0:.9f} degrees".format(gps.longitude))
         # print(f"DDM Latitude: {int(gps.latitude)} Degrees {60 *
