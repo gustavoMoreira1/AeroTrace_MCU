@@ -138,7 +138,6 @@ while True:
             if connectonce == 0:
                 print("connected")
                 connectonce = 1
-
             # Make sure to call gps.update() every loop iteration and at least twice
             # as fast as data comes from the GPS unit (usually every second).
             # This returns a bool that's true if it parsed new data (you can ignore it
