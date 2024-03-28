@@ -145,7 +145,7 @@ while True:
 
             while not gps.has_fix:
                 gps.update()
-                #Try again if we don't have a fix yet.
+                # Try again if we don't have a fix yet.
                 count = count + 1
                 if count == frequency_hertz:
                     count = 0
