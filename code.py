@@ -42,19 +42,20 @@ disconnected_BLE = False
 # this flag is used to indicate when the BLE disconnects.
 
 
-def dilutionGrader():
-    if gps.horizontal_dilution < 1:
-        return "Dilution Grade: Ideal"
-    elif gps.horizontal_dilution < 2:
-        return "Dilution Grade: Excellent"
-    elif gps.horizontal_dilution < 5:
-        return "Dilution Grade: Good"
-    elif gps.horizontal_dilution < 10:
-        return "Dilution Grade: Moderate"
-    elif gps.horizontal_dilution < 20:
-        return "Dilution Grade: Fair"
-    else:
-        return "Dilution Grade: Poor"
+# def dilutionGrader():
+# if gps.horizontal_dilution < 1:
+# return "Dilution Grade: Ideal"
+# elif gps.horizontal_dilution < 2:
+# return "Dilution Grade: Excellent"
+# elif gps.horizontal_dilution < 5:
+# return "Dilution Grade: Good"
+# elif gps.horizontal_dilution < 10:
+# return "Dilution Grade: Moderate"
+# elif gps.horizontal_dilution < 20:
+# return "Dilution Grade: Fair"
+# else:
+# return "Dilution Grade: Poor"
+
 
 # Initialize the GPS module by changing what data it sends and at what rate.
 # These are NMEA extensions for PMTK_314_SET_NMEA_OUTPUT and
@@ -112,7 +113,7 @@ while True:
     current = time.monotonic()
     if disconnected_BLE is True:
         print("ever arrive here?")
-        if disconnected_counter <= 20*frequency_hertz:
+        if disconnected_counter <= 20 * frequency_hertz:
             disconnected_counter = disconnected_counter + 1
         else:
             discconected_counter = 0
@@ -217,8 +218,8 @@ while True:
                 disconnected_BLE = True
                 if disconnected_counter <= disconnected_counter * 20:
                     disconnected_data.append(
-                            "========================================\n"
-                        )
+                        "========================================\n"
+                    )
                     # Print a separator line.
                     # 1. TIMESTAMP {}/{}/{} {:02}:{:02}:{:02}
                     disconnected_data.append(
