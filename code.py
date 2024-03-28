@@ -37,20 +37,24 @@ uart = busio.UART(board.D3, board.D2, baudrate=9600, timeout=10)
 # Create a GPS module instance.
 gps = adafruit_gps.GPS(uart, debug=False)  # Use UART/pyserial
 # gps = adafruit_gps.GPS_GtopI2C(i2c, debug=False)  # Use I2C interface
+
+disconnected_BLE = False
+# this flag is used to indicate when the BLE disconnects.
+
+
 def dilutionGrader():
     if gps.horizontal_dilution < 1:
-        uart1.write("Dilution Grade: Ideal")
+        return "Dilution Grade: Ideal"
     elif gps.horizontal_dilution < 2:
-        uart1.write("Dilution Grade: Excellent")
+        return "Dilution Grade: Excellent"
     elif gps.horizontal_dilution < 5:
-        uart1.write("Dilution Grade: Good")
+        return "Dilution Grade: Good"
     elif gps.horizontal_dilution < 10:
-        uart1.write("Dilution Grade: Moderate")
+        return "Dilution Grade: Moderate"
     elif gps.horizontal_dilution < 20:
-        uart1.write("Dilution Grade: Fair")
+        return "Dilution Grade: Fair"
     else:
-        uart1.write("Dilution Grade: Poor")
-
+        return "Dilution Grade: Poor"
 
 # Initialize the GPS module by changing what data it sends and at what rate.
 # These are NMEA extensions for PMTK_314_SET_NMEA_OUTPUT and
@@ -81,31 +85,46 @@ gps.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
 # 10 Hz is the maximum frequency... need to stress test for later -
 # gps.send_command(b"PMTK220,100")
 # data during parsing.  This would be twice a second (4hz, 250ms delay):
-gps.send_command(b"PMTK220,250")
 
+# here is the frequency, do not let it go over 10!!
+frequency_hertz = 8
+
+frequency_conversion = int(1 / frequency_hertz * 1000)  # AKA miliseconds
+gps_send_command = "PMTK220," + str(frequency_conversion)
+# print(gps_send_command)
+# gps.send_command(b"PMTK220,250")
+
+# experimental gps.senc_command
+gps.send_command(bytes(gps_send_command, "ascii"))
 
 # Main loop runs forever printing the location, etc. every second.
 last_print = time.monotonic()
 count = 0
+
+# array of data when discconected
+disconnected_data = []
+disconnected_counter = 0
+
 while True:
-    # Make sure to call gps.update() every loop iteration and at least twice
-    # as fast as data comes from the GPS unit (usually every second).
-    # This returns a bool that's true if it parsed new data (you can ignore it
-    # though if you don't care and instead look at the has_fix property).
-    gps.update()
+
     last_time = 0
     # Every second print out current location details if there's a fix.
     current = time.monotonic()
-    if current - last_print >= 0.250:
+    if disconnected_BLE is True:
+        print("ever arrive here?")
+        if disconnected_counter <= 20*frequency_hertz:
+            disconnected_counter = disconnected_counter + 1
+        else:
+            discconected_counter = 0
+    if current - last_print >= (frequency_conversion / 1000):
         last_print = current
-        if not gps.has_fix:
-            # Try again if we don't have a fix yet.
-            current_time = time.time()
-            count = count + 1
-            if count == 4:
-                count = 0
-            print(f"Waiting for fix... {current_time} {count}")
-            continue
+        # if not gps.has_fix:
+        #     # Try again if we don't have a fix yet.
+        #     count = count + 1
+        #     if count == frequency_hertz:
+        #         count = 0
+        #     print(f"Waiting for fix... {time.time()} {count}")
+        #     continue
         # We have a fix! (gps.has_fix is true)
         # Print out details about the fix like location, date, etc.
 
@@ -117,23 +136,143 @@ while True:
             if connectonce == 0:
                 print("connected")
                 connectonce = 1
-            uart1.write("========================================")
-            # Print a separator line.
 
-            uart1.write(
-                "Fix timestamp: {}/{}/{} {:02}:{:02}:{:02}".format(
-                    gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
-                    gps.timestamp_utc.tm_mday,  # struct_time object that holds
-                    gps.timestamp_utc.tm_year,  # the fix time.  Note you might
-                    gps.timestamp_utc.tm_hour - 6,  # not get all data like year, day,
-                    gps.timestamp_utc.tm_min,  # month!
-                    gps.timestamp_utc.tm_sec,
-                    # gps.timestamp_utc[6]
-                    # cannot find way to scape ms. Need to identify timestamp init code.
+            # Make sure to call gps.update() every loop iteration and at least twice
+            # as fast as data comes from the GPS unit (usually every second).
+            # This returns a bool that's true if it parsed new data (you can ignore it
+            # though if you don't care and instead look at the has_fix property).
+            gps.update()
+
+            while not gps.has_fix:
+                gps.update()
+                #Try again if we don't have a fix yet.
+                count = count + 1
+                if count == frequency_hertz:
+                    count = 0
+                uart1.write(f"Waiting for fix... {time.time()} {count}\n")
+                print(f"Waiting for fix... {time.time()} {count}")
+                time.sleep(frequency_conversion / 1000)
+            if disconnected_BLE is True:
+                print("Uploading lost data")
+                for data in disconnected_data:
+                    try:
+                        uart1.write(data)
+                    except Exception:
+                        pass
+                disconnected_BLE = False
+                disconnected_data = []
+            try:
+                uart1.write("========================================")
+                # Print a separator line.
+                # 1. TIMESTAMP {}/{}/{} {:02}:{:02}:{:02}
+                uart1.write(
+                    "{}/{}/{} {:02}:{:02}:{:02}".format(
+                        gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
+                        gps.timestamp_utc.tm_mday,  # struct_time object that holds
+                        gps.timestamp_utc.tm_year,  # the fix time.  Note you might
+                        gps.timestamp_utc.tm_hour - 6,  # Central Time zone
+                        gps.timestamp_utc.tm_min,  # month!
+                        gps.timestamp_utc.tm_sec,
+                        # gps.timestamp_utc[6]
+                        # cannot find way to scape ms.
+                        # Need to identify timestamp init code.
                     )
                 )
-            uart1.write("Raw Latitude: {0:.9f} degrees".format(gps.latitude))
-            uart1.write("Raw Longitude: {0:.9f} degrees".format(gps.longitude))
+                # 2. Latitute
+                if gps.latitude is not None:
+                    uart1.write("{0:.9f}".format(gps.latitude))
+                else:
+                    uart1.write("NoLat")
+                # 3. Longitude
+                if gps.longitude is not None:
+                    uart1.write("{0:.9f}".format(gps.longitude))
+                else:
+                    uart1.write("NoLong")
+                # 4. # of sattelites
+                if gps.satellites is not None:
+                    uart1.write("{}".format(gps.satellites))
+                else:
+                    uart1.write("NoSat")
+                # 5. Altitude in Feet
+                if gps.altitude_m is not None:
+                    uart1.write("{}".format(gps.altitude_m * 3.28084))
+                else:
+                    uart1.write("NoAlt")
+                # 6. Speed miles/hour
+                if gps.speed_knots is not None:
+                    uart1.write("{}".format(gps.speed_knots * 1.15078))
+                else:
+                    uart1.write("NoSpeed")
+                # 7. Track angle degrees
+                if gps.track_angle_deg is not None:
+                    uart1.write("{}".format(gps.track_angle_deg))
+                else:
+                    uart1.write("NoTrac")
+                # 8. Horizontal dilution
+                if gps.horizontal_dilution is not None:
+                    uart1.write("{}\n".format(gps.horizontal_dilution))
+                else:
+                    uart1.write("NoDil")
+            except Exception:
+                disconnected_BLE = True
+                if disconnected_counter <= disconnected_counter * 20:
+                    disconnected_data.append(
+                            "========================================\n"
+                        )
+                    # Print a separator line.
+                    # 1. TIMESTAMP {}/{}/{} {:02}:{:02}:{:02}
+                    disconnected_data.append(
+                        "{}/{}/{} {:02}:{:02}:{:02}\n".format(
+                            gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
+                            gps.timestamp_utc.tm_mday,  # struct_time object that holds
+                            gps.timestamp_utc.tm_year,  # the fix time.  Note you might
+                            gps.timestamp_utc.tm_hour - 6,  # Central Time zone
+                            gps.timestamp_utc.tm_min,  # month!
+                            gps.timestamp_utc.tm_sec,
+                            # gps.timestamp_utc[6]
+                            # cannot find way to scape ms.
+                            # Need to identify timestamp init code.
+                        )
+                    )
+                    # 2. Latitute
+                    if gps.latitude is not None:
+                        disconnected_data.append("{0:.9f}\n".format(gps.latitude))
+                    else:
+                        disconnected_data.append("NoLat\n")
+                    # 3. Longitude
+                    if gps.longitude is not None:
+                        disconnected_data.append("{0:.9f}\n".format(gps.longitude))
+                    else:
+                        disconnected_data.append("NoLong\n")
+                    # 4. # of sattelites
+                    if gps.satellites is not None:
+                        disconnected_data.append("{}\n".format(gps.satellites))
+                    else:
+                        disconnected_data.append("NoSat\n")
+                    # 5. Altitude in Feet
+                    if gps.altitude_m is not None:
+                        disconnected_data.append(
+                            "{}\n".format(gps.altitude_m * 3.28084)
+                        )
+                    else:
+                        disconnected_data.append("NoAlt\n")
+                    # 6. Speed miles/hour
+                    if gps.speed_knots is not None:
+                        disconnected_data.append(
+                            "{}\n".format(gps.speed_knots * 1.15078)
+                        )
+                    else:
+                        disconnected_data.append("NoSpeed\n")
+                    # 7. Track angle degrees
+                    if gps.track_angle_deg is not None:
+                        disconnected_data.append("{}\n".format(gps.track_angle_deg))
+                    else:
+                        disconnected_data.append("NoTrac\n")
+                    # 8. Horizontal dilution
+                    if gps.horizontal_dilution is not None:
+                        disconnected_data.append("{}\n".format(gps.horizontal_dilution))
+                    else:
+                        disconnected_data.append("NoDil\n")
         # print(f"DDM Latitude: {int(gps.latitude)} Degrees {60 *
         # (int(gps.latitude)-gps.latitude)} Minutes")
         # print(f"DDM Longitude: {int(gps.longitude)} Degrees {60 *
@@ -149,22 +288,22 @@ while True:
         #        gps.longitude_degrees, gps.longitude_minutes
         #    )
         # )
-            uart1.write("Fix quality: {}".format(gps.fix_quality))
+        # print("Fix quality: {}".format(gps.fix_quality))
         # Some attributes beyond latitude, longitude and timestamp are optional
         # and might not be present.  Check if they're None before trying to use!
-            if gps.satellites is not None:
-                uart1.write("# satellites: {}".format(gps.satellites))
-            if gps.altitude_m is not None:
-                uart1.write("Altitude: {} feet".format(gps.altitude_m * 3.28084))
-            if gps.speed_knots is not None:
-                uart1.write("Speed: {} miles/hour".format(gps.speed_knots * 1.15078))
-            if gps.track_angle_deg is not None:
-                uart1.write("Track angle: {} degrees".format(gps.track_angle_deg))
-            if gps.horizontal_dilution is not None:
-                uart1.write(f"Horizontal dilution: {gps.horizontal_dilution}")
-                dilutionGrader()
+        # if gps.satellites is not None:
+        # uart1.write("# satellites: {}".format(gps.satellites))
+        # if gps.altitude_m is not None:
+        # uart1.write("Altitude: {} feet".format(gps.altitude_m * 3.28084))
+        # if gps.speed_knots is not None:
+        # uart1.write("Speed: {} miles/hour".format(gps.speed_knots * 1.15078))
+        # if gps.track_angle_deg is not None:
+        # uart1.write("Track angle: {} degrees".format(gps.track_angle_deg))
+        # if gps.horizontal_dilution is not None:
+        # uart1.write(f"Horizontal dilution: {gps.horizontal_dilution}")
+        # dilutionGrader(disconnected_BLE)
 
-            # print(f"Dilution Grade {dilutionGrader()}")
-            # print(f"Horizontal dilution: {}".format(gps.horizontal_dilution))
+        # print(f"Dilution Grade {dilutionGrader()}")
+        # print(f"Horizontal dilution: {}".format(gps.horizontal_dilution))
         # if gps.height_geoid is not None:
         #    print("Height geoid: {} meters".format(gps.height_geoid))
