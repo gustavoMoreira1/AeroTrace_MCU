@@ -112,10 +112,11 @@ while True:
     # Every second print out current location details if there's a fix.
     current = time.monotonic()
     if disconnected_BLE is True:
-        print("ever arrive here?")
         if disconnected_counter <= 20 * frequency_hertz:
+            print(f"Iteration: {disconnected_counter}/{20 * frequency_hertz}")
             disconnected_counter = disconnected_counter + 1
         else:
+            print("Finished")
             discconected_counter = 0
     if current - last_print >= (frequency_conversion / 1000):
         last_print = current
