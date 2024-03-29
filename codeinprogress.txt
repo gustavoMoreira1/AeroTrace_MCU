@@ -124,16 +124,17 @@ while True:
         #     continue
         # We have a fix! (gps.has_fix is true)
         # Print out details about the fix like location, date, etc.
-        if advertise_counter == 0
+        if advertise_counter == 0:
             ble.start_advertising(advertisement)
             print("Advertising...")
             advertise_counter = 1
         while not ble.connected and not disconnected_BLE:
             pass
-        
+
         if not ble.connected and disconnected_BLE:
-            while disconnected_counter <= 20 * frequency_hertz:
-                print(f"Iteration: {disconnected_counter}/{20 * frequency_hertz}")
+            print("got to here")
+            while disconnected_counter <= 10 * frequency_hertz:
+                print(f"Iteration: {disconnected_counter}/{10 * frequency_hertz}")
                 disconnected_counter = disconnected_counter + 1
                 disconnected_data.append(
                     "{}/{}/{} {:02}:{:02}:{:02}\n".format(
@@ -188,8 +189,11 @@ while True:
             disconnected_counter = 0
         if ble.connected and disconnected_BLE:
             print("Uploading Lost Data")
+            asdfg = 0
             for data in disconnected_data:
                 try:
+                    asdfg = asdfg + 1
+                    print(asdfg)
                     uart1.write(data)
                 except Exception:
                     pass
@@ -271,7 +275,7 @@ while True:
             except Exception:
                 disconnected_BLE = True
                 advertise_counter = 1
-                if disconnected_counter <= disconnected_counter * 20:
+                if disconnected_counter <= disconnected_counter * 10:
                     disconnected_data.append(
                         "========================================\n"
                     )
@@ -363,4 +367,4 @@ while True:
         # print(f"Horizontal dilution: {}".format(gps.horizontal_dilution))
         # if gps.height_geoid is not None:
         #    print("Height geoid: {} meters".format(gps.height_geoid))
-        
+
