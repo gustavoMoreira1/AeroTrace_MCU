@@ -108,6 +108,8 @@ disconnected_counter = 0
 
 advertise_counter = 0
 
+save_once = 0
+
 while True:
 
     last_time = 0
@@ -131,7 +133,7 @@ while True:
         while not ble.connected and not disconnected_BLE:
             pass
 
-        if not ble.connected and disconnected_BLE:
+        if not ble.connected and disconnected_BLE and save_once == 0:
             print("got to here")
             while disconnected_counter <= 10 * frequency_hertz:
                 print(f"Iteration: {disconnected_counter}/{10 * frequency_hertz}")
@@ -186,6 +188,7 @@ while True:
                     disconnected_data.append("NoDil\n")
                 time.sleep(frequency_conversion / 1000)
             print("Finished downloading data")
+            save_once = 1
             disconnected_counter = 0
         if ble.connected and disconnected_BLE:
             print("Uploading Lost Data")
@@ -199,6 +202,7 @@ while True:
                     pass
             disconnected_BLE = False
             disconnected_data = []
+            save_once = 0
 
         # SSENDSENDSNED SEND SEND SEND
         while ble.connected:
