@@ -141,7 +141,7 @@ while True:
             while disconnected_counter <= 10 * frequency_hertz:
                 print(f"Iteration: {disconnected_counter}/{10 * frequency_hertz}")
                 disconnected_counter = disconnected_counter + 1
-                disconnected_data.append(
+                ''' disconnected_data.append(
                     "TIME:{}/{}/{} {:02}:{:02}:{:02}\n".format(
                         gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
                         gps.timestamp_utc.tm_mday,  # struct_time object that holds
@@ -153,7 +153,7 @@ while True:
                         # cannot find way to scape ms.
                         # Need to identify timestamp init code.
                     )
-                )
+                )'''
                 # 2. Latitute
                 if gps.latitude is not None:
                     disconnected_data.append("LA:{0:.9f}\n".format(gps.latitude))
@@ -165,10 +165,10 @@ while True:
                 else:
                     disconnected_data.append("NoLong\n")
                 # 4. # of sattelites
-                if gps.satellites is not None:
+                '''if gps.satellites is not None:
                     disconnected_data.append("ST:{}\n".format(gps.satellites))
                 else:
-                    disconnected_data.append("NoSat\n")
+                    disconnected_data.append("NoSat\n")'''
                 # 5. Altitude in Feet
                 if gps.altitude_m is not None:
                     disconnected_data.append("AL:{}\n".format(gps.altitude_m * 3.28084))
@@ -187,10 +187,10 @@ while True:
                 else:
                     disconnected_data.append("NoTrac\n")
                 # 8. Horizontal dilution
-                if gps.horizontal_dilution is not None:
+                '''if gps.horizontal_dilution is not None:
                     disconnected_data.append("HD:{}\n".format(gps.horizontal_dilution))
                 else:
-                    disconnected_data.append("NoDil\n")
+                    disconnected_data.append("NoDil\n")'''
                 time.sleep(frequency_conversion / 1000)
             # print("Finished downloading data")
             save_once = 1
@@ -235,7 +235,7 @@ while True:
                 # uart1.write("========================================")
                 # Print a separator line.
                 # 1. TIMESTAMP {}/{}/{} {:02}:{:02}:{:02}
-                uart1.write(
+                '''uart1.write(
                     "TIME:{}/{}/{} {:02}:{:02}:{:02}".format(
                         gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
                         gps.timestamp_utc.tm_mday,  # struct_time object that holds
@@ -247,7 +247,7 @@ while True:
                         # cannot find way to scape ms.
                         # Need to identify timestamp init code.
                     )
-                )
+                )'''
                 # 2. Latitute
                 if gps.latitude is not None:
                     uart1.write("LA:{0:.9f}".format(gps.latitude))
@@ -259,10 +259,10 @@ while True:
                 else:
                     uart1.write("NoLong")
                 # 4. # of sattelites
-                if gps.satellites is not None:
+                '''if gps.satellites is not None:
                     uart1.write("ST:{}".format(gps.satellites))
                 else:
-                    uart1.write("NoSat")
+                    uart1.write("NoSat")'''
                 # 5. Altitude in Feet
                 if gps.altitude_m is not None:
                     uart1.write("AL:{}".format(gps.altitude_m * 3.28084))
@@ -279,10 +279,10 @@ while True:
                 else:
                     uart1.write("NoTrac")
                 # 8. Horizontal dilution
-                if gps.horizontal_dilution is not None:
+                '''if gps.horizontal_dilution is not None:
                     uart1.write("HD:{}\n".format(gps.horizontal_dilution))
                 else:
-                    uart1.write("NoDil")
+                    uart1.write("NoDil")'''
             except Exception:
                 disconnected_BLE = True
                 advertise_counter = 1
@@ -292,7 +292,7 @@ while True:
                     )"""
                     # Print a separator line.
                     # 1. TIMESTAMP {}/{}/{} {:02}:{:02}:{:02}
-                    disconnected_data.append(
+                    '''disconnected_data.append(
                         "TIME:{}/{}/{} {:02}:{:02}:{:02}\n".format(
                             gps.timestamp_utc.tm_mon,  # Grab parts of the time from the
                             gps.timestamp_utc.tm_mday,  # struct_time object that holds
@@ -304,7 +304,7 @@ while True:
                             # cannot find way to scape ms.
                             # Need to identify timestamp init code.
                         )
-                    )
+                    )'''
                     # 2. Latitute
                     if gps.latitude is not None:
                         disconnected_data.append("LA:{0:.9f}\n".format(gps.latitude))
@@ -316,10 +316,10 @@ while True:
                     else:
                         disconnected_data.append("NoLong\n")
                     # 4. # of sattelites
-                    if gps.satellites is not None:
+                    '''if gps.satellites is not None:
                         disconnected_data.append("ST:{}\n".format(gps.satellites))
                     else:
-                        disconnected_data.append("NoSat\n")
+                        disconnected_data.append("NoSat\n")'''
                     # 5. Altitude in Feet
                     if gps.altitude_m is not None:
                         disconnected_data.append(
@@ -340,12 +340,12 @@ while True:
                     else:
                         disconnected_data.append("NoTrac\n")
                     # 8. Horizontal dilution
-                    if gps.horizontal_dilution is not None:
+                    '''if gps.horizontal_dilution is not None:
                         disconnected_data.append(
                             "HD:{}\n".format(gps.horizontal_dilution)
                         )
                     else:
-                        disconnected_data.append("NoDil\n")
+                        disconnected_data.append("NoDil\n")'''
         # print(f"DDM Latitude: {int(gps.latitude)} Degrees {60 *
         # (int(gps.latitude)-gps.latitude)} Minutes")
         # print(f"DDM Longitude: {int(gps.longitude)} Degrees {60 *
