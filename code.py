@@ -15,8 +15,12 @@ from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 from adafruit_ble.services.nordic import UARTService
 
 ble = BLERadio()
-ble.name = "Aerotrace2"
+ble.name = "Aerotrace1"
 uart1 = UARTService()
+
+# print(uart1)
+# print("Hello")
+
 advertisement = ProvideServicesAdvertisement(uart1)
 
 connectonce = 0
@@ -222,8 +226,10 @@ while True:
                 count = count + 1
                 if count == frequency_hertz:
                     count = 0
-                uart1.write(f"Waiting for fix... {time.time()} {count}\n")
-                print(f"Waiting for fix... {time.time()} {count}")
+                # uart1.write(f"Waiting for fix... {time.time()} {count}\n")
+                # print(f"Waiting for fix... {time.time()} {count}")
+                uart1.write(f"Waiting for fix... {count}")
+                print(f"Waiting for fix... {count}")
                 time.sleep(frequency_conversion / 1000)
             try:
                 # uart1.write("========================================")
