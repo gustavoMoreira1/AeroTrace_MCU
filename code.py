@@ -250,12 +250,16 @@ while True:
                 )"""
                 # 2. Latitute
                 if gps.latitude is not None:
-                    uart1.write("LA:{0:.9f}".format(gps.latitude))
+                    # uart1.write("LA:{0:.9f}".format(gps.latitude))
+                    uart1.write(f"LA:{gps.latitude}")
+                    print(f"LA:{gps.latitude}")
                 else:
                     uart1.write("NoLat")
                 # 3. Longitude
                 if gps.longitude is not None:
-                    uart1.write("LO:{0:.9f}".format(gps.longitude))
+                    # uart1.write("LO:{0:.9f}".format(gps.longitude))
+                    uart1.write(f"LO:{gps.longitude}")
+                    print(f"LO:{gps.longitude}")
                 else:
                     uart1.write("NoLong")
                 # 4. # of sattelites
@@ -265,19 +269,27 @@ while True:
                     uart1.write("NoSat")"""
                 # 5. Altitude in Feet
                 if gps.altitude_m is not None:
-                    uart1.write("AL:{}".format(gps.altitude_m * 3.28084))
+                    # uart1.write("AL:{}".format(gps.altitude_m * 3.28084))
+                    uart1.write(f"AL:{gps.altitude_m * 3.28084}")
+                    print(f"AL:{gps.altitude_m * 3.28084}")
                 else:
                     uart1.write("NoAlt")
                 # 6. Speed miles/hour
                 if gps.speed_knots is not None:
-                    uart1.write("SP:{}".format(gps.speed_knots * 1.15078))
+                    # uart1.write("SP:{}".format(gps.speed_knots * 1.15078))
+                    uart1.write(f"SP:{gps.speed_knots * 1.15078}")
+                    print(f"SP:{gps.speed_knots * 1.15078}")
                 else:
-                    uart1.write("NoSpeed")
+                    uart1.write("SP:NoSpeed")
+                    print("SP:NoSpeed")
                 # 7. Track angle degrees
                 if gps.track_angle_deg is not None:
-                    uart1.write("TA:{}".format(gps.track_angle_deg))
+                    # uart1.write("TA:{}".format(gps.track_angle_deg))
+                    uart1.write(f"TA:{gps.track_angle_deg}")
+                    print(f"TA:{gps.track_angle_deg}")
                 else:
-                    uart1.write("NoTrac")
+                    uart1.write("TA:NoTrac")
+                    print("TA:NoTrac")
                 # 8. Horizontal dilution
                 """if gps.horizontal_dilution is not None:
                     uart1.write("HD:{}\n".format(gps.horizontal_dilution))
