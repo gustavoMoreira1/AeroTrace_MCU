@@ -156,14 +156,14 @@ while True:
                 )"""
                 # 2. Latitute
                 if gps.latitude is not None:
-                    disconnected_data.append("LA:{0:.9f}\n".format(gps.latitude))
+                    disconnected_data.append("LA:{0:.9f}".format(gps.latitude))
                 else:
-                    disconnected_data.append("NoLat\n")
+                    disconnected_data.append("LA:NoLat")
                 # 3. Longitude
                 if gps.longitude is not None:
-                    disconnected_data.append("LO:{0:.9f}\n".format(gps.longitude))
+                    disconnected_data.append("LO:{0:.9f}".format(gps.longitude))
                 else:
-                    disconnected_data.append("NoLong\n")
+                    disconnected_data.append("LO:NoLong")
                 # 4. # of sattelites
                 """if gps.satellites is not None:
                     disconnected_data.append("ST:{}\n".format(gps.satellites))
@@ -171,21 +171,21 @@ while True:
                     disconnected_data.append("NoSat\n")"""
                 # 5. Altitude in Feet
                 if gps.altitude_m is not None:
-                    disconnected_data.append("AL:{}\n".format(gps.altitude_m * 3.28084))
+                    disconnected_data.append("AL:{}".format(gps.altitude_m * 3.28084))
                 else:
-                    disconnected_data.append("NoAlt\n")
+                    disconnected_data.append("AL:NoAlt")
                 # 6. Speed miles/hour
                 if gps.speed_knots is not None:
                     disconnected_data.append(
-                        "SP:{}\n".format(gps.speed_knots * 1.15078)
+                        "SP:{}".format(gps.speed_knots * 1.15078)
                     )
                 else:
-                    disconnected_data.append("NoSpeed\n")
+                    disconnected_data.append("SP:NoSpeed")
                 # 7. Track angle degrees
                 if gps.track_angle_deg is not None:
-                    disconnected_data.append("TA:{}\n".format(gps.track_angle_deg))
+                    disconnected_data.append("TA:{}".format(gps.track_angle_deg))
                 else:
-                    disconnected_data.append("NoTrac\n")
+                    disconnected_data.append("TA:NoTrac")
                 # 8. Horizontal dilution
                 """if gps.horizontal_dilution is not None:
                     disconnected_data.append("HD:{}\n".format(gps.horizontal_dilution))
@@ -251,17 +251,21 @@ while True:
                 # 2. Latitute
                 if gps.latitude is not None:
                     # uart1.write("LA:{0:.9f}".format(gps.latitude))
-                    uart1.write(f"LA:{gps.latitude}")
-                    print(f"LA:{gps.latitude}")
+                    # uart1.write(f"LA:{gps.latitude}")
+                    uart1.write(f"LA:{gps.latitude:.9f}")
+                    print(f"LA:{gps.latitude:.9f}")
                 else:
-                    uart1.write("NoLat")
+                    uart1.write("LA:NoLat")
+                    print("LA:NoLat")
                 # 3. Longitude
                 if gps.longitude is not None:
                     # uart1.write("LO:{0:.9f}".format(gps.longitude))
-                    uart1.write(f"LO:{gps.longitude}")
-                    print(f"LO:{gps.longitude}")
+                    # uart1.write(f"LO:{gps.longitude}")
+                    uart1.write(f"LO:{gps.longitude:.9f}")
+                    print(f"LO:{gps.longitude:.9f}")
                 else:
-                    uart1.write("NoLong")
+                    uart1.write("LO:NoLong")
+                    print("LO:Nolong")
                 # 4. # of sattelites
                 """if gps.satellites is not None:
                     uart1.write("ST:{}".format(gps.satellites))
@@ -273,7 +277,8 @@ while True:
                     uart1.write(f"AL:{gps.altitude_m * 3.28084}")
                     print(f"AL:{gps.altitude_m * 3.28084}")
                 else:
-                    uart1.write("NoAlt")
+                    uart1.write("AL:NoAlt")
+                    print("AL:NoAlt")
                 # 6. Speed miles/hour
                 if gps.speed_knots is not None:
                     # uart1.write("SP:{}".format(gps.speed_knots * 1.15078))
@@ -319,14 +324,14 @@ while True:
                     )"""
                     # 2. Latitute
                     if gps.latitude is not None:
-                        disconnected_data.append("LA:{0:.9f}\n".format(gps.latitude))
+                        disconnected_data.append("LA:{0:.9f}".format(gps.latitude))
                     else:
-                        disconnected_data.append("NoLat\n")
+                        disconnected_data.append("NoLat")
                     # 3. Longitude
                     if gps.longitude is not None:
-                        disconnected_data.append("LO:{0:.9f}\n".format(gps.longitude))
+                        disconnected_data.append("LO:LO:{0:.9f}".format(gps.longitude))
                     else:
-                        disconnected_data.append("NoLong\n")
+                        disconnected_data.append("LO:NoLong")
                     # 4. # of sattelites
                     """if gps.satellites is not None:
                         disconnected_data.append("ST:{}\n".format(gps.satellites))
@@ -335,22 +340,22 @@ while True:
                     # 5. Altitude in Feet
                     if gps.altitude_m is not None:
                         disconnected_data.append(
-                            "AL:{}\n".format(gps.altitude_m * 3.28084)
+                            "AL:{}".format(gps.altitude_m * 3.28084)
                         )
                     else:
-                        disconnected_data.append("NoAlt\n")
+                        disconnected_data.append("AL:NoAlt")
                     # 6. Speed miles/hour
                     if gps.speed_knots is not None:
                         disconnected_data.append(
-                            "SP:{}\n".format(gps.speed_knots * 1.15078)
+                            "SP:{}".format(gps.speed_knots * 1.15078)
                         )
                     else:
-                        disconnected_data.append("NoSpeed\n")
+                        disconnected_data.append("SP:NoSpeed")
                     # 7. Track angle degrees
                     if gps.track_angle_deg is not None:
-                        disconnected_data.append("TA:{}\n".format(gps.track_angle_deg))
+                        disconnected_data.append("TA:{}".format(gps.track_angle_deg))
                     else:
-                        disconnected_data.append("NoTrac\n")
+                        disconnected_data.append("TA:NoTrac")
                     # 8. Horizontal dilution
                     """if gps.horizontal_dilution is not None:
                         disconnected_data.append(
