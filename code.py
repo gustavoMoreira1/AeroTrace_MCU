@@ -191,6 +191,7 @@ while True:
                 time.sleep(frequency_conversion / 1000)
             print("Finished downloading data")
             save_once = 1
+            advertise_counter=0
             disconnected_counter = 0
         if ble.connected and disconnected_BLE:
             print("Uploading Lost Data")
