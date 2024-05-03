@@ -131,6 +131,7 @@ while True:
             print("Advertising...")
             advertise_counter = 1
         while not ble.connected and not disconnected_BLE:
+            # print("Got to here")
             pass
 
         if not ble.connected and disconnected_BLE and save_once == 0:
@@ -292,7 +293,7 @@ while True:
                     uart1.write("NoDil")"""
             except Exception:
                 disconnected_BLE = True
-                advertise_counter = 0
+                advertise_counter = 1
                 if disconnected_counter <= disconnected_counter * 10:
                     """disconnected_data.append(
                         "========================================\n"
