@@ -210,7 +210,8 @@ while True:
             save_once = 0
 
         # SSENDSENDSNED SEND SEND SEND
-        while ble.connected:
+        # while ble.connected:
+        while True:
             if connectonce == 0:
                 print("connected")
                 connectonce = 1
@@ -250,16 +251,32 @@ while True:
                 if gps.latitude is not None:
                     uart1.write(f"LA:{gps.latitude:.9f}")
                     print(f"LA:{gps.latitude:.9f}")
+                    print(f"BleStatus: {ble.connected}")
+                    if ble.connected is False:
+                        print("Breaking!")
+                        break
                 else:
                     uart1.write("LA:NoLat")
                     print("LA:NoLat")
+                    print(f"BleStatus: {ble.connected}")
+                    if ble.connected is False:
+                        print("Breaking!")
+                        break
                 # 3. Longitude
                 if gps.longitude is not None:
                     uart1.write(f"LO:{gps.longitude:.9f}")
                     print(f"LO:{gps.longitude:.9f}")
+                    print(f"BleStatus: {ble.connected}")
+                    if ble.connected is False:
+                        print("Breaking!")
+                        break
                 else:
                     uart1.write("LO:NoLong")
                     print("LO:Nolong")
+                    print(f"BleStatus: {ble.connected}")
+                    if ble.connected is False:
+                        print("Breaking!")
+                        break
                 # 4. # of sattelites
                 """if gps.satellites is not None:
                     uart1.write("{}".format(gps.satellites))
@@ -269,23 +286,47 @@ while True:
                 if gps.altitude_m is not None:
                     uart1.write(f"AL:{gps.altitude_m * 3.28084}")
                     print(f"AL:{gps.altitude_m * 3.28084}")
+                    print(f"BleStatus: {ble.connected}")
+                    if ble.connected is False:
+                        print("Breaking!")
+                        break
                 else:
                     uart1.write("AL:NoAlt")
                     print("AL:NoAlt")
+                    print(f"BleStatus: {ble.connected}")
+                    if ble.connected is False:
+                        print("Breaking!")
+                        break
                 # 6. Speed miles/hour
                 if gps.speed_knots is not None:
                     uart1.write(f"SP:{gps.speed_knots * 1.15078}")
                     print(f"SP:{gps.speed_knots * 1.15078}")
+                    print(f"BleStatus: {ble.connected}")
+                    if ble.connected is False:
+                        print("Breaking!")
+                        break
                 else:
                     uart1.write("SP:NoSpeed")
                     print("SP:NoSpeed")
+                    print(f"BleStatus: {ble.connected}")
+                    if ble.connected is False:
+                        print("Breaking!")
+                        break
                 # 7. Track angle degrees
                 if gps.track_angle_deg is not None:
                     uart1.write(f"TA:{gps.track_angle_deg}")
                     print(f"TA:{gps.track_angle_deg}")
+                    print(f"BleStatus: {ble.connected}")
+                    if ble.connected is False:
+                        print("Breaking!")
+                        break
                 else:
                     uart1.write("TA:NoTrac")
                     print("TA:NoTrac")
+                    print(f"BleStatus: {ble.connected}")
+                    if ble.connected is False:
+                        print("Breaking!")
+                        break
                 # 8. Horizontal dilution
                 """if gps.horizontal_dilution is not None:
                     uart1.write("{}\n".format(gps.horizontal_dilution))
@@ -293,6 +334,8 @@ while True:
                     uart1.write("NoDil")"""
             except Exception:
                 disconnected_BLE = True
+                #print(f"BleStatus: {ble.connected}")
+                print("Disconnected")
                 advertise_counter = 1
                 if disconnected_counter <= disconnected_counter * 10:
                     """disconnected_data.append(
