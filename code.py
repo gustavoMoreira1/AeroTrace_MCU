@@ -416,37 +416,3 @@ while True:
                         disconnected_data.append("{}\n".format(gps.horizontal_dilution))
                     else:
                         disconnected_data.append("NoDil\n")"""
-        # print(f"DDM Latitude: {int(gps.latitude)} Degrees {60 *
-        # (int(gps.latitude)-gps.latitude)} Minutes")
-        # print(f"DDM Longitude: {int(gps.longitude)} Degrees {60 *
-        # (int(gps.longitude)-gps.longitude)} Minutes")
-
-        # print(
-        #    "Precise Latitude: {:2.}{:2.4f} degrees".format(
-        #        gps.latitude_degrees, gps.latitude_minutes
-        #    )
-        # )
-        # print(
-        #    "Precise Longitude: {:2.}{:2.4f} degrees".format(
-        #        gps.longitude_degrees, gps.longitude_minutes
-        #    )
-        # )
-        # print("Fix quality: {}".format(gps.fix_quality))
-        # Some attributes beyond latitude, longitude and timestamp are optional
-        # and might not be present.  Check if they're None before trying to use!
-        # if gps.satellites is not None:
-        # uart1.write("# satellites: {}".format(gps.satellites))
-        # if gps.altitude_m is not None:
-        # uart1.write("Altitude: {} feet".format(gps.altitude_m * 3.28084))
-        # if gps.speed_knots is not None:
-        # uart1.write("Speed: {} miles/hour".format(gps.speed_knots * 1.15078))
-        # if gps.track_angle_deg is not None:
-        # uart1.write("Track angle: {} degrees".format(gps.track_angle_deg))
-        # if gps.horizontal_dilution is not None:
-        # uart1.write(f"Horizontal dilution: {gps.horizontal_dilution}")
-        # dilutionGrader(disconnected_BLE)
-
-        # print(f"Dilution Grade {dilutionGrader()}")
-        # print(f"Horizontal dilution: {}".format(gps.horizontal_dilution))
-        # if gps.height_geoid is not None:
-        #    print("Height geoid: {} meters".format(gps.height_geoid))
