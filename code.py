@@ -15,7 +15,7 @@ from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 from adafruit_ble.services.nordic import UARTService
 
 ble = BLERadio()
-ble.name = "Aerotrace5"
+ble.name = "Aerotrace6"
 uart1 = UARTService()
 advertisement = ProvideServicesAdvertisement(uart1)
 
@@ -196,14 +196,15 @@ while True:
             disconnected_counter = 0
         if ble.connected and disconnected_BLE:
             print("Uploading Lost Data")
-            asdfg = 0
-            time.sleep(3)
+            asdfg = 0 # counters
+            time.sleep(2)
             for data in disconnected_data:
                 try:
                     asdfg = asdfg + 1
                     print(asdfg)
                     uart1.write(data)
                     print(data)
+                    time.sleep(0.05)
                 except Exception:
                     pass
             disconnected_BLE = False
@@ -252,7 +253,7 @@ while True:
                 if gps.latitude is not None:
                     uart1.write(f"LA:{gps.latitude:.9f}")
                     print(f"LA:{gps.latitude:.9f}")
-                    print(f"BleStatus: {ble.connected}")
+                    # print(f"BleStatus: {ble.connected}")
                     if ble.connected is False:
                         print("Breaking!")
                         disconnected_BLE = True
@@ -261,7 +262,7 @@ while True:
                 else:
                     uart1.write("LA:NoLat")
                     print("LA:NoLat")
-                    print(f"BleStatus: {ble.connected}")
+                    # print(f"BleStatus: {ble.connected}")
                     if ble.connected is False:
                         print("Breaking!")
                         disconnected_BLE = True
@@ -271,7 +272,7 @@ while True:
                 if gps.longitude is not None:
                     uart1.write(f"LO:{gps.longitude:.9f}")
                     print(f"LO:{gps.longitude:.9f}")
-                    print(f"BleStatus: {ble.connected}")
+                    # print(f"BleStatus: {ble.connected}")
                     if ble.connected is False:
                         print("Breaking!")
                         disconnected_BLE = True
@@ -280,7 +281,7 @@ while True:
                 else:
                     uart1.write("LO:NoLong")
                     print("LO:Nolong")
-                    print(f"BleStatus: {ble.connected}")
+                    # print(f"BleStatus: {ble.connected}")
                     if ble.connected is False:
                         print("Breaking!")
                         disconnected_BLE = True
@@ -295,7 +296,7 @@ while True:
                 if gps.altitude_m is not None:
                     uart1.write(f"AL:{gps.altitude_m * 3.28084}")
                     print(f"AL:{gps.altitude_m * 3.28084}")
-                    print(f"BleStatus: {ble.connected}")
+                    # print(f"BleStatus: {ble.connected}")
                     if ble.connected is False:
                         print("Breaking!")
                         disconnected_BLE = True
@@ -304,7 +305,7 @@ while True:
                 else:
                     uart1.write("AL:NoAlt")
                     print("AL:NoAlt")
-                    print(f"BleStatus: {ble.connected}")
+                    # print(f"BleStatus: {ble.connected}")
                     if ble.connected is False:
                         print("Breaking!")
                         disconnected_BLE = True
@@ -314,7 +315,7 @@ while True:
                 if gps.speed_knots is not None:
                     uart1.write(f"SP:{gps.speed_knots * 1.15078}")
                     print(f"SP:{gps.speed_knots * 1.15078}")
-                    print(f"BleStatus: {ble.connected}")
+                    # print(f"BleStatus: {ble.connected}")
                     if ble.connected is False:
                         print("Breaking!")
                         disconnected_BLE = True
@@ -323,7 +324,7 @@ while True:
                 else:
                     uart1.write("SP:NoSpeed")
                     print("SP:NoSpeed")
-                    print(f"BleStatus: {ble.connected}")
+                    # print(f"BleStatus: {ble.connected}")
                     if ble.connected is False:
                         print("Breaking!")
                         disconnected_BLE = True
@@ -333,7 +334,7 @@ while True:
                 if gps.track_angle_deg is not None:
                     uart1.write(f"TA:{gps.track_angle_deg}")
                     print(f"TA:{gps.track_angle_deg}")
-                    print(f"BleStatus: {ble.connected}")
+                    # print(f"BleStatus: {ble.connected}")
                     if ble.connected is False:
                         print("Breaking!")
                         disconnected_BLE = True
@@ -342,7 +343,7 @@ while True:
                 else:
                     uart1.write("TA:NoTrac")
                     print("TA:NoTrac")
-                    print(f"BleStatus: {ble.connected}")
+                    # print(f"BleStatus: {ble.connected}")
                     if ble.connected is False:
                         print("Breaking!")
                         disconnected_BLE = True
