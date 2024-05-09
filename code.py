@@ -197,6 +197,7 @@ while True:
         if ble.connected and disconnected_BLE:
             print("Uploading Lost Data")
             asdfg = 0
+            time.sleep(3)
             for data in disconnected_data:
                 try:
                     asdfg = asdfg + 1
